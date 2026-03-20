@@ -2,13 +2,12 @@ import { create } from 'zustand'
 import type { Review, Settings, ReviewType } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types'
 import {
-  getAllReviews,
-  saveReview,
-  getAllSettings,
-  setSetting,
-  getCompletedReviewIds,
-  saveObsidianHandle,
-} from '@/lib/storage'
+  fetchReviews,
+  upsertReview,
+  fetchSettings,
+  saveSettings,
+} from '@/lib/actions'
+import { saveObsidianHandle } from '@/lib/storage'
 import { toISODate, getReviewsDueToday } from '@/lib/schedule'
 import { QUESTIONS } from '@/lib/questions'
 
@@ -38,27 +37,26 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
   isLoaded: false,
 
   loadAll: async () => {
-    const [reviews, settings, completedIds] = await Promise.all([
-      getAllReviews(),
-      getAllSettings(),
-      getCompletedReviewIds(),
+    const [reviews, settings] = await Promise.all([
+      fetchReviews(),
+      fetchSettings(),
     ])
+    const completedIds = new Set(reviews.filter((r) => !r.isDraft).map((r) => r.id))
     set({ reviews, settings, completedIds, isLoaded: true })
   },
 
   updateSetting: async (key, value) => {
-    await setSetting(key, value)
-    set((state) => ({
-      settings: { ...state.settings, [key]: value },
-    }))
+    const next = { ...get().settings, [key]: value }
+    await saveSettings(next)
+    set({ settings: next })
   },
 
   setObsidianFolder: async (handle, path) => {
+    // FileSystemDirectoryHandle can only be stored in IndexedDB (browser-only object)
     await saveObsidianHandle(handle)
-    await setSetting('obsidianFolderPath', path)
-    set((state) => ({
-      settings: { ...state.settings, obsidianFolderPath: path },
-    }))
+    const next = { ...get().settings, obsidianFolderPath: path }
+    await saveSettings(next)
+    set({ settings: next })
   },
 
   startReview: (type, date) => {
@@ -77,7 +75,7 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
     }
 
     set((state) => ({ reviews: [...state.reviews, review] }))
-    saveReview(review) // fire and forget
+    upsertReview(review) // fire and forget
     return review
   },
 
@@ -94,7 +92,7 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
 
     const review = get().reviews.find((r) => r.id === reviewId)
     if (review) {
-      await saveReview(review)
+      await upsertReview(review)
     }
   },
 
@@ -108,7 +106,7 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
       completedAt: new Date().toISOString(),
     }
 
-    await saveReview(completed)
+    await upsertReview(completed)
 
     set((state) => ({
       reviews: state.reviews.map((r) => (r.id === reviewId ? completed : r)),

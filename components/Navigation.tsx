@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { UserButton } from '@clerk/nextjs'
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -28,6 +29,7 @@ export default function Navigation() {
               {label}
             </Link>
           ))}
+          <UserButton />
         </div>
       </div>
     </nav>
