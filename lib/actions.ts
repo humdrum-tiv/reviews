@@ -2,6 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { getDb, initSchema } from './db'
+import { encrypt, decrypt } from './encrypt'
 import type { Review, Settings } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types'
 
@@ -46,7 +47,7 @@ export async function upsertReview(review: Review): Promise<void> {
       ${review.date},
       ${review.completedAt ?? null},
       ${review.isDraft},
-      ${JSON.stringify(review.answers)},
+      ${encrypt(JSON.stringify(review.answers))},
       NOW()
     )
     ON CONFLICT (id, user_id) DO UPDATE SET
@@ -96,6 +97,6 @@ function rowToReview(row: Record<string, unknown>): Review {
     date: row.date as string,
     completedAt: (row.completed_at as string | null) ?? null,
     isDraft: row.is_draft as boolean,
-    answers: row.answers as Review['answers'],
+    answers: JSON.parse(decrypt(row.answers as string)) as Review['answers'],
   }
 }

@@ -18,10 +18,25 @@ export async function initSchema(): Promise<void> {
       date        TEXT        NOT NULL,
       completed_at TIMESTAMPTZ,
       is_draft    BOOLEAN     NOT NULL DEFAULT true,
-      answers     JSONB       NOT NULL DEFAULT '[]',
+      answers     TEXT        NOT NULL DEFAULT '[]',
       updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       PRIMARY KEY (id, user_id)
     )
+  `
+
+  // Migrate existing databases: convert answers from JSONB to TEXT so it can
+  // hold encrypted ciphertext. Safe to run on already-migrated schemas.
+  await sql`
+    DO $$
+    BEGIN
+      IF (
+        SELECT data_type
+        FROM information_schema.columns
+        WHERE table_name = 'reviews' AND column_name = 'answers'
+      ) = 'jsonb' THEN
+        ALTER TABLE reviews ALTER COLUMN answers TYPE TEXT USING answers::text;
+      END IF;
+    END $$
   `
 
   await sql`
