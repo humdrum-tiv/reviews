@@ -79,7 +79,7 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
     return review
   },
 
-  updateAnswer: async (reviewId, questionId, text) => {
+  updateAnswer: (reviewId, questionId, text) => {
     set((state) => ({
       reviews: state.reviews.map((r) => {
         if (r.id !== reviewId) return r
@@ -92,7 +92,7 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
 
     const review = get().reviews.find((r) => r.id === reviewId)
     if (review) {
-      await upsertReview(review)
+      upsertReview(review) // fire and forget — do not block typing on a server round-trip
     }
   },
 
