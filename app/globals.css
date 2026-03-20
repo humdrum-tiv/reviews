@@ -2,20 +2,20 @@
 
 /* ─── Design Tokens ─────────────────────────────────────────────────────── */
 :root {
-  --bg:           #F7F5F0;   /* warm off-white page background */
-  --bg-raised:    #EDE9E0;   /* slightly darker — slab surface */
-  --bg-inset:     #E8E4D8;   /* recessed/inset areas */
-  --bg-well:      #DDD8CB;   /* deepest inset — textarea well */
-  --border:       #C8C0AD;   /* slab border / dividers */
-  --border-dark:  #A89880;   /* stronger border */
-  --text:         #1C1C1C;   /* primary text */
-  --text-muted:   #6B6355;   /* secondary text */
-  --text-faint:   #9E9587;   /* placeholder, hints */
-  --accent:       #8B7355;   /* warm brown accent */
-  --accent-hover: #735E41;   /* darker accent on hover */
-  --accent-light: #C4AF92;   /* lighter accent tint */
+  --bg:           #F0F2F4;   /* cool light grey page background */
+  --bg-raised:    #E5E8EB;   /* slightly darker — slab surface */
+  --bg-inset:     #D8DCE0;   /* recessed/inset areas */
+  --bg-well:      #CDD2D7;   /* deepest inset — textarea well */
+  --border:       #BCC3CA;   /* slab border / dividers */
+  --border-dark:  #99A3AD;   /* stronger border */
+  --text:         #1A1D21;   /* primary text */
+  --text-muted:   #56616C;   /* secondary text */
+  --text-faint:   #8B97A2;   /* placeholder, hints */
+  --accent:       #4A7FA5;   /* slate blue accent */
+  --accent-hover: #3A6A8C;   /* darker accent on hover */
+  --accent-light: #9DBDD4;   /* lighter accent tint */
   --shadow-slab:  0 2px 0 0 var(--border-dark), 0 4px 16px 0 rgba(0,0,0,0.06);
-  --shadow-inset: inset 0 2px 6px 0 rgba(0,0,0,0.08), inset 0 1px 2px 0 rgba(0,0,0,0.05);
+  --shadow-inset: inset 0 2px 8px 0 rgba(0,0,0,0.14), inset 0 1px 3px 0 rgba(0,0,0,0.10);
   --radius:       6px;
   --radius-lg:    10px;
 }
@@ -376,6 +376,7 @@ body {
   background: var(--bg-well);
   padding: 4px 6px 6px;
   box-shadow: var(--shadow-inset);
+  border-top: 1px solid var(--border-dark);
 }
 
 .answer-textarea {
