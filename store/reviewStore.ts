@@ -27,7 +27,7 @@ interface ReviewStore {
   setObsidianFolder: (handle: FileSystemDirectoryHandle, path: string) => Promise<void>
 
   startReview: (type: ReviewType, date: string) => Review
-  updateAnswer: (reviewId: string, questionId: string, text: string) => Promise<void>
+  updateAnswer: (reviewId: string, questionId: string, text: string) => void
   completeReview: (reviewId: string) => Promise<Review | null>
   getReview: (id: string) => Review | undefined
 
