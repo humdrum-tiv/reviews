@@ -33,8 +33,8 @@ export default function ReviewWriter({ type, date }: ReviewWriterProps) {
   }, [type, date, getReview])
 
   const handleChange = useCallback(
-    async (questionId: string, text: string) => {
-      await updateAnswer(review.id, questionId, text)
+    (questionId: string, text: string) => {
+      updateAnswer(review.id, questionId, text)
       setReview((r) => ({
         ...r,
         answers: r.answers.map((a) =>

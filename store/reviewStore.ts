@@ -11,6 +11,10 @@ import { saveObsidianHandle } from '@/lib/storage'
 import { toISODate, getReviewsDueToday } from '@/lib/schedule'
 import { QUESTIONS } from '@/lib/questions'
 
+// Per-review debounce timers. Keyed by reviewId so concurrent reviews don't
+// interfere with each other.
+const saveTimers = new Map<string, ReturnType<typeof setTimeout>>()
+
 interface ReviewStore {
   reviews: Review[]
   settings: Settings
@@ -23,7 +27,7 @@ interface ReviewStore {
   setObsidianFolder: (handle: FileSystemDirectoryHandle, path: string) => Promise<void>
 
   startReview: (type: ReviewType, date: string) => Review
-  updateAnswer: (reviewId: string, questionId: string, text: string) => Promise<void>
+  updateAnswer: (reviewId: string, questionId: string, text: string) => void
   completeReview: (reviewId: string) => Promise<Review | null>
   getReview: (id: string) => Review | undefined
 
@@ -79,7 +83,8 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
     return review
   },
 
-  updateAnswer: async (reviewId, questionId, text) => {
+  updateAnswer: (reviewId, questionId, text) => {
+    // Update local state immediately so the UI is always snappy.
     set((state) => ({
       reviews: state.reviews.map((r) => {
         if (r.id !== reviewId) return r
@@ -90,10 +95,22 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
       }),
     }))
 
-    const review = get().reviews.find((r) => r.id === reviewId)
-    if (review) {
-      await upsertReview(review)
-    }
+    // Debounce the actual DB write. If the user is still typing we keep
+    // pushing the save back. When the timer finally fires we read the
+    // *current* store state so we always persist the latest content —
+    // never an intermediate snapshot from a stale closure.
+    const existing = saveTimers.get(reviewId)
+    if (existing) clearTimeout(existing)
+
+    const timer = setTimeout(() => {
+      saveTimers.delete(reviewId)
+      const review = get().reviews.find((r) => r.id === reviewId)
+      if (review) {
+        upsertReview(review) // fire and forget — do not block typing on a server round-trip
+      }
+    }, 600)
+
+    saveTimers.set(reviewId, timer)
   },
 
   completeReview: async (reviewId) => {
