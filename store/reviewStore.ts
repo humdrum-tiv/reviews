@@ -41,12 +41,17 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
   isLoaded: false,
 
   loadAll: async () => {
-    const [reviews, settings] = await Promise.all([
-      fetchReviews(),
-      fetchSettings(),
-    ])
-    const completedIds = new Set(reviews.filter((r) => !r.isDraft).map((r) => r.id))
-    set({ reviews, settings, completedIds, isLoaded: true })
+    try {
+      const [reviews, settings] = await Promise.all([
+        fetchReviews(),
+        fetchSettings(),
+      ])
+      const completedIds = new Set(reviews.filter((r) => !r.isDraft).map((r) => r.id))
+      set({ reviews, settings, completedIds, isLoaded: true })
+    } catch (err) {
+      console.error('Failed to load data:', err)
+      set({ isLoaded: true })
+    }
   },
 
   updateSetting: async (key, value) => {

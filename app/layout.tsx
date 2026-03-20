@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider signInUrl="/sign-in">
       <html lang="en">
         <body>
           <Navigation />
