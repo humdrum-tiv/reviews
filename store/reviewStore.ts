@@ -16,13 +16,51 @@ import { QUESTIONS } from '@/lib/questions'
 // interfere with each other.
 const saveTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
+// ── localStorage cache ────────────────────────────────────────────────────────
+// We persist only completedIds and settings — no review content — so the UI
+// can render the correct "nothing due / all done" state instantly on reopen
+// without waiting for the server fetch.
+
+const CACHE_KEY = 'reviews-cache-v1'
+
+interface ReviewCache {
+  completedIds: string[]
+  settings: Settings
+}
+
+function readCache(): ReviewCache | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    return raw ? (JSON.parse(raw) as ReviewCache) : null
+  } catch {
+    return null
+  }
+}
+
+function writeCache(completedIds: Set<string>, settings: Settings): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({ completedIds: Array.from(completedIds), settings })
+    )
+  } catch {
+    // Storage unavailable (private browsing, quota exceeded) — silently skip
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface ReviewStore {
   reviews: Review[]
   settings: Settings
   completedIds: Set<string>
   isLoaded: boolean
+  isHydrated: boolean // true once localStorage cache has been applied client-side
 
   // Actions
+  initFromCache: () => void
   loadAll: () => Promise<void>
   updateSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => Promise<void>
   setObsidianFolder: (handle: FileSystemDirectoryHandle, path: string) => Promise<void>
@@ -41,6 +79,19 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
   settings: DEFAULT_SETTINGS,
   completedIds: new Set(),
   isLoaded: false,
+  isHydrated: false,
+
+  // Called from a useLayoutEffect in the dashboard so it runs synchronously
+  // on the client before the first paint, eliminating the loading flash.
+  initFromCache: () => {
+    const cache = readCache()
+    if (!cache) return
+    set({
+      settings: cache.settings,
+      completedIds: new Set(cache.completedIds),
+      isHydrated: true,
+    })
+  },
 
   loadAll: async () => {
     try {
@@ -49,6 +100,7 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
         fetchSettings(),
       ])
       const completedIds = new Set(reviews.filter((r) => !r.isDraft).map((r) => r.id))
+      writeCache(completedIds, settings)
       set({ reviews, settings, completedIds, isLoaded: true })
     } catch (err) {
       console.error('Failed to load data:', err)
@@ -60,6 +112,7 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
     const next = { ...get().settings, [key]: value }
     await saveSettings(next)
     set({ settings: next })
+    writeCache(get().completedIds, next)
   },
 
   setObsidianFolder: async (handle, path) => {
@@ -141,6 +194,7 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
       }
     })
 
+    writeCache(get().completedIds, get().settings)
     return completed
   },
 
@@ -154,6 +208,7 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
         completedIds: nextCompleted,
       }
     })
+    writeCache(get().completedIds, get().settings)
   },
 
   getReview: (id) => get().reviews.find((r) => r.id === id),
