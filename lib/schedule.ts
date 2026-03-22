@@ -78,7 +78,8 @@ function getAnnualReviewDate(year: number, restDay: number | null): Date {
  * which reviews have already been completed (set of "type-YYYY-MM-DD" ids).
  *
  * Priority: annual > quarterly > monthly > weekly > [morning, evening]
- * If any major review (weekly+) is due today, morning/evening are suppressed.
+ * If any major review (weekly+) is scheduled today, morning/evening are suppressed
+ * (regardless of whether the major review is completed).
  * If it's a rest day, nothing is due.
  */
 export function getReviewsDueToday(
@@ -106,16 +107,17 @@ export function getReviewsDueToday(
 
   const due: ReviewType[] = []
 
-  if (annualDate === dateStr && !completedIds.has(`annual-${dateStr}`)) {
-    due.push('annual')
-  } else if (quarterlyDate === dateStr && !completedIds.has(`quarterly-${dateStr}`)) {
-    due.push('quarterly')
-  } else if (monthlyDate === dateStr && !completedIds.has(`monthly-${dateStr}`)) {
-    due.push('monthly')
-  } else if (weeklyDate === dateStr && !completedIds.has(`weekly-${dateStr}`)) {
-    due.push('weekly')
+  // Check which type of day this is, and add if not yet completed
+  if (annualDate === dateStr) {
+    if (!completedIds.has(`annual-${dateStr}`)) due.push('annual')
+  } else if (quarterlyDate === dateStr) {
+    if (!completedIds.has(`quarterly-${dateStr}`)) due.push('quarterly')
+  } else if (monthlyDate === dateStr) {
+    if (!completedIds.has(`monthly-${dateStr}`)) due.push('monthly')
+  } else if (weeklyDate === dateStr) {
+    if (!completedIds.has(`weekly-${dateStr}`)) due.push('weekly')
   } else {
-    // Regular day: morning + evening
+    // Regular day: morning + evening (only if NOT a major review day)
     if (!completedIds.has(`morning-${dateStr}`)) due.push('morning')
     if (!completedIds.has(`evening-${dateStr}`)) due.push('evening')
   }
