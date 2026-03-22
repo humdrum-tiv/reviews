@@ -1,7 +1,13 @@
 import { neon } from '@neondatabase/serverless'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let cachedDb: any = null
+
 export function getDb() {
-  return neon(process.env.DATABASE_URL!)
+  if (!cachedDb) {
+    cachedDb = neon(process.env.DATABASE_URL!)
+  }
+  return cachedDb as ReturnType<typeof neon<false, false>>
 }
 
 /**

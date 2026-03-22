@@ -17,6 +17,12 @@ export default function SettingsPage() {
     if (!isLoaded) loadAll()
   }, [isLoaded, loadAll])
 
+  // Auto-reschedule notifications when times change
+  useEffect(() => {
+    if (!isLoaded || !settings.notificationsEnabled) return
+    setupDailyNotifications(settings.morningTime, settings.eveningTime)
+  }, [isLoaded, settings.notificationsEnabled, settings.morningTime, settings.eveningTime])
+
   const handleNotifications = async () => {
     setNotifStatus('Requesting…')
     await registerServiceWorker()
@@ -65,7 +71,12 @@ export default function SettingsPage() {
             <button
               key={i}
               className={`day-btn ${settings.restDay === i ? 'day-btn--active' : ''}`}
-              onClick={() => updateSetting('restDay', i)}
+              onClick={() => {
+                if (i === settings.weeklyReviewDay) return // prevent conflict
+                updateSetting('restDay', i)
+              }}
+              disabled={i === settings.weeklyReviewDay}
+              title={i === settings.weeklyReviewDay ? 'Cannot rest on your weekly review day' : undefined}
             >
               {name.slice(0, 3)}
             </button>
@@ -84,7 +95,12 @@ export default function SettingsPage() {
             <button
               key={i}
               className={`day-btn ${settings.weeklyReviewDay === i ? 'day-btn--active' : ''}`}
-              onClick={() => updateSetting('weeklyReviewDay', i)}
+              onClick={() => {
+                if (i === settings.restDay) return // prevent conflict
+                updateSetting('weeklyReviewDay', i)
+              }}
+              disabled={i === settings.restDay}
+              title={i === settings.restDay ? 'Cannot review on your rest day' : undefined}
             >
               {name.slice(0, 3)}
             </button>

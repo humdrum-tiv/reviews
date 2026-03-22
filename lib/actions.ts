@@ -6,13 +6,17 @@ import { encrypt, decrypt } from './encrypt'
 import type { Review, Settings } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types'
 
-// Lazily initialize the schema once per cold start
-let schemaReady = false
+// Lazily initialize the schema once per cold start.
+// Use a promise guard to prevent concurrent cold-start requests from racing.
+let schemaPromise: Promise<void> | null = null
 async function ensureSchema() {
-  if (!schemaReady) {
-    await initSchema()
-    schemaReady = true
+  if (!schemaPromise) {
+    schemaPromise = initSchema().catch((err) => {
+      schemaPromise = null // allow retry on failure
+      throw err
+    })
   }
+  await schemaPromise
 }
 
 // ── Reviews ────────────────────────────────────────────────────────────────
@@ -85,6 +89,19 @@ export async function saveSettings(settings: Settings): Promise<void> {
     ON CONFLICT (user_id) DO UPDATE SET
       settings   = EXCLUDED.settings,
       updated_at = NOW()
+  `
+}
+
+// ── Delete ─────────────────────────────────────────────────────────────────
+
+export async function deleteReview(reviewId: string): Promise<void> {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+  await ensureSchema()
+
+  const sql = getDb()
+  await sql`
+    DELETE FROM reviews WHERE id = ${reviewId} AND user_id = ${userId}
   `
 }
 
