@@ -402,6 +402,38 @@ body {
   font-style: italic;
 }
 
+.answer-textarea[readonly] {
+  cursor: default;
+}
+
+/* Rating row (1–10 buttons) */
+.rating-row {
+  display: flex;
+  gap: 6px;
+  padding: 16px 22px;
+  flex-wrap: wrap;
+}
+
+.rating-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+.rating-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+.rating-btn--active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.rating-btn:disabled { cursor: default; opacity: 0.7; }
+
 /* Complete section */
 .complete-section {
   padding: 32px 0 0;
@@ -430,6 +462,53 @@ body {
 .save-msg {
   font-size: 13px;
   color: var(--accent);
+}
+
+.completed-label {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.delete-btn {
+  font-size: 13px;
+  padding: 6px 14px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+.delete-btn:hover { color: #A04040; border-color: #A04040; }
+
+.delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.delete-confirm-text {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.delete-confirm-yes {
+  font-size: 13px;
+  padding: 5px 12px;
+  background: #A04040;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.delete-confirm-yes:hover { background: #8B3535; }
+.delete-confirm-no {
+  font-size: 13px;
+  padding: 5px 12px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
 }
 
 /* ─── History Panel ─────────────────────────────────────────────────────── */
@@ -730,7 +809,8 @@ body {
   cursor: pointer;
   transition: color 0.1s, border-color 0.1s, background 0.1s;
 }
-.day-btn:hover { color: var(--text); border-color: var(--accent-light); }
+.day-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent-light); }
+.day-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .day-btn--active {
   background: var(--accent);
   color: var(--bg);

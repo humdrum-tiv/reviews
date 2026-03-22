@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS } from '@/types'
 import {
   fetchReviews,
   upsertReview,
+  deleteReview as deleteReviewAction,
   fetchSettings,
   saveSettings,
 } from '@/lib/actions'
@@ -29,6 +30,7 @@ interface ReviewStore {
   startReview: (type: ReviewType, date: string) => Review
   updateAnswer: (reviewId: string, questionId: string, text: string) => void
   completeReview: (reviewId: string) => Promise<Review | null>
+  deleteReview: (reviewId: string) => Promise<void>
   getReview: (id: string) => Review | undefined
 
   getTodaysDue: () => ReviewType[]
@@ -130,12 +132,28 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
 
     await upsertReview(completed)
 
-    set((state) => ({
-      reviews: state.reviews.map((r) => (r.id === reviewId ? completed : r)),
-      completedIds: new Set([...state.completedIds, reviewId]),
-    }))
+    set((state) => {
+      const nextCompleted = new Set(state.completedIds)
+      nextCompleted.add(reviewId)
+      return {
+        reviews: state.reviews.map((r) => (r.id === reviewId ? completed : r)),
+        completedIds: nextCompleted,
+      }
+    })
 
     return completed
+  },
+
+  deleteReview: async (reviewId) => {
+    await deleteReviewAction(reviewId)
+    set((state) => {
+      const nextCompleted = new Set(state.completedIds)
+      nextCompleted.delete(reviewId)
+      return {
+        reviews: state.reviews.filter((r) => r.id !== reviewId),
+        completedIds: nextCompleted,
+      }
+    })
   },
 
   getReview: (id) => get().reviews.find((r) => r.id === id),

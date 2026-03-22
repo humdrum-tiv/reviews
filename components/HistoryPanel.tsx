@@ -5,7 +5,7 @@ import { useReviewStore } from '@/store/reviewStore'
 import type { Review, ReviewType } from '@/types'
 import { REVIEW_LABELS } from '@/types'
 import { getHistoryContext, getReviewPeriod, formatDateLong } from '@/lib/schedule'
-import { generateMarkdown } from '@/lib/export'
+import { QUESTIONS } from '@/lib/questions'
 
 interface HistoryPanelProps {
   type: ReviewType
@@ -104,8 +104,6 @@ function HistoryEntry({
 }
 
 function getQuestionText(type: ReviewType, questionId: string): string {
-  // Lazy import to avoid circular deps
-  const { QUESTIONS } = require('@/lib/questions')
-  const q = QUESTIONS[type]?.find((q: { id: string; text: string }) => q.id === questionId)
+  const q = QUESTIONS[type]?.find((q) => q.id === questionId)
   return q?.text ?? questionId
 }

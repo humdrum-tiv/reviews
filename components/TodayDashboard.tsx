@@ -6,6 +6,7 @@ import { useReviewStore } from '@/store/reviewStore'
 import { toISODate, formatDateLong, getScheduledReviewType } from '@/lib/schedule'
 import { REVIEW_LABELS, REVIEW_COLORS } from '@/types'
 import type { ReviewType } from '@/types'
+import { QUESTIONS } from '@/lib/questions'
 
 export default function TodayDashboard() {
   const { loadAll, isLoaded, getTodaysDue, reviews, completedIds, settings } = useReviewStore()
@@ -96,14 +97,7 @@ function ReviewCard({
   isDraft: boolean
 }) {
   const color = REVIEW_COLORS[type]
-  const questionCounts: Record<ReviewType, number> = {
-    morning: 6,
-    evening: 6,
-    weekly: 12,
-    monthly: 18,
-    quarterly: 24,
-    annual: 40,
-  }
+  const questionCount = QUESTIONS[type].length
 
   return (
     <Link href={`/review/${type}?date=${date}`} className="review-card">
@@ -111,7 +105,7 @@ function ReviewCard({
       <div className="review-card-body">
         <h2 className="review-card-title">{REVIEW_LABELS[type]}</h2>
         <p className="review-card-meta">
-          {questionCounts[type]} questions
+          {questionCount} questions
           {isDraft && !isCompleted && ' · in progress'}
         </p>
       </div>

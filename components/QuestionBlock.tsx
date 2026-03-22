@@ -9,6 +9,8 @@ interface QuestionBlockProps {
   answer: string
   onChange: (text: string) => void
   isFocused?: boolean
+  questionType?: 'text' | 'rating'
+  readOnly?: boolean
 }
 
 export default function QuestionBlock({
@@ -18,6 +20,8 @@ export default function QuestionBlock({
   answer,
   onChange,
   isFocused,
+  questionType = 'text',
+  readOnly = false,
 }: QuestionBlockProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -47,14 +51,31 @@ export default function QuestionBlock({
 
       {/* Inset writing area */}
       <div className="answer-well">
-        <textarea
-          ref={textareaRef}
-          value={answer}
-          onChange={(e) => onChange(e.target.value)}
-          className="answer-textarea"
-          placeholder="Write your answer here…"
-          rows={5}
-        />
+        {questionType === 'rating' ? (
+          <div className="rating-row">
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={`rating-btn ${answer === String(n) ? 'rating-btn--active' : ''}`}
+                onClick={() => !readOnly && onChange(String(n))}
+                disabled={readOnly}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <textarea
+            ref={textareaRef}
+            value={answer}
+            onChange={(e) => onChange(e.target.value)}
+            className="answer-textarea"
+            placeholder={readOnly ? '' : 'Write your answer here…'}
+            rows={5}
+            readOnly={readOnly}
+          />
+        )}
       </div>
     </div>
   )

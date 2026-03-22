@@ -18,11 +18,12 @@ interface ReviewWriterProps {
 
 export default function ReviewWriter({ type, date }: ReviewWriterProps) {
   const router = useRouter()
-  const { startReview, updateAnswer, completeReview, getReview, settings } = useReviewStore()
+  const { startReview, updateAnswer, completeReview, deleteReview, getReview, settings } = useReviewStore()
   const [review, setReview] = useState(() => startReview(type, date))
   const [historyOpen, setHistoryOpen] = useState(false)
   const [completing, setCompleting] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const questions = QUESTIONS[type]
 
@@ -109,22 +110,49 @@ export default function ReviewWriter({ type, date }: ReviewWriterProps) {
                 index={i}
                 total={questions.length}
                 questionText={q.text}
+                questionType={q.type ?? 'text'}
                 answer={answer}
                 onChange={(text) => handleChange(q.id, text)}
+                readOnly={!review.isDraft}
               />
             )
           })}
 
-          {/* Complete button */}
+          {/* Complete / read-only footer */}
           <div className="complete-section">
             {saveMsg && <p className="save-msg">{saveMsg}</p>}
-            <button
-              onClick={handleComplete}
-              disabled={completing}
-              className="complete-btn"
-            >
-              {completing ? 'Saving…' : 'Complete Review'}
-            </button>
+            {review.isDraft ? (
+              <button
+                onClick={handleComplete}
+                disabled={completing}
+                className="complete-btn"
+              >
+                {completing ? 'Saving…' : 'Complete Review'}
+              </button>
+            ) : (
+              <p className="completed-label">Completed {review.completedAt ? new Date(review.completedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''}</p>
+            )}
+            {!confirmDelete ? (
+              <button onClick={() => setConfirmDelete(true)} className="delete-btn">
+                Delete review
+              </button>
+            ) : (
+              <div className="delete-confirm">
+                <span className="delete-confirm-text">Are you sure?</span>
+                <button
+                  onClick={async () => {
+                    await deleteReview(review.id)
+                    router.push('/')
+                  }}
+                  className="delete-confirm-yes"
+                >
+                  Delete
+                </button>
+                <button onClick={() => setConfirmDelete(false)} className="delete-confirm-no">
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
