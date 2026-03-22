@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import Link from 'next/link'
 import { useReviewStore } from '@/store/reviewStore'
 import { toISODate, formatDateLong, getScheduledReviewType } from '@/lib/schedule'
@@ -9,13 +9,19 @@ import type { ReviewType } from '@/types'
 import { QUESTIONS } from '@/lib/questions'
 
 export default function TodayDashboard() {
-  const { loadAll, isLoaded, getTodaysDue, reviews, completedIds, settings } = useReviewStore()
+  const { loadAll, isLoaded, isHydrated, initFromCache, getTodaysDue, reviews, completedIds, settings } = useReviewStore()
+
+  // Hydrate from localStorage before the first paint so the correct state
+  // (e.g. "nothing due today") is shown instantly without a loading flash.
+  useLayoutEffect(() => {
+    initFromCache()
+  }, [initFromCache])
 
   useEffect(() => {
     loadAll()
   }, [loadAll])
 
-  if (!isLoaded) {
+  if (!isLoaded && !isHydrated) {
     return (
       <div className="loading-state">
         <p>Loading…</p>
