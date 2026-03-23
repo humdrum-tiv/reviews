@@ -5,11 +5,40 @@ import { useReviewStore } from '@/store/reviewStore'
 import { pickObsidianFolder } from '@/lib/export'
 import { saveObsidianHandle } from '@/lib/storage'
 import { requestNotificationPermission, registerServiceWorker, setupDailyNotifications, notificationsSupported } from '@/lib/notifications'
+import { useTheme, type Theme, type Mode } from '@/components/ThemeProvider'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
+type ThemeOption = { id: Theme; label: string; variant: 'light' | 'dark' }
+
+const THEME_OPTIONS: ThemeOption[] = [
+  { id: 'stone',    label: 'Stone — Light', variant: 'light' },
+  { id: 'stone',    label: 'Stone — Dark',  variant: 'dark'  },
+  { id: 'terminal', label: 'Terminal — Light', variant: 'light' },
+  { id: 'terminal', label: 'Terminal — Dark',  variant: 'dark'  },
+]
+
+function ThemePreview({ themeId, variant }: { themeId: Theme; variant: 'light' | 'dark' }) {
+  const key = `${themeId}-${variant}` as const
+  return (
+    <div className={`theme-preview theme-preview--${key}`}>
+      <div className={`theme-preview-bar theme-preview-bar--${key}`}>
+        <div className={`theme-preview-dot theme-preview-dot--${key}`} />
+        <div className={`theme-preview-dot theme-preview-dot--${key}`} style={{ opacity: 0.4 }} />
+        <div className={`theme-preview-dot theme-preview-dot--${key}`} style={{ opacity: 0.4 }} />
+      </div>
+      <div className="theme-preview-lines">
+        <div className={`theme-preview-line theme-preview-line--${key} short`} />
+        <div className={`theme-preview-line theme-preview-line--${key}`} />
+        <div className={`theme-preview-line theme-preview-line--${key}`} style={{ width: '75%' }} />
+      </div>
+    </div>
+  )
+}
+
 export default function SettingsPage() {
   const { loadAll, isLoaded, settings, updateSetting, setObsidianFolder } = useReviewStore()
+  const { theme, resolvedMode, setTheme, mode, setMode } = useTheme()
   const [notifStatus, setNotifStatus] = useState('')
   const [obsidianStatus, setObsidianStatus] = useState('')
 
@@ -53,6 +82,50 @@ export default function SettingsPage() {
   return (
     <div className="settings-layout">
       <h1 className="page-title">Settings</h1>
+
+      {/* Appearance */}
+      <section className="settings-section">
+        <h2 className="settings-section-title">Appearance</h2>
+        <p className="settings-description">
+          Choose a theme and color mode. Stone uses a layered grey-slab design with serif type.
+          Terminal uses monospace fonts, flat borders, and a phosphor-screen palette.
+        </p>
+
+        <div className="theme-options">
+          {THEME_OPTIONS.map((opt) => {
+            const isActive = theme === opt.id && resolvedMode === opt.variant
+            return (
+              <button
+                key={opt.label}
+                className={`theme-option ${isActive ? 'theme-option--active' : ''}`}
+                onClick={() => {
+                  setTheme(opt.id)
+                  setMode(opt.variant as Mode)
+                }}
+                title={opt.label}
+              >
+                <ThemePreview themeId={opt.id} variant={opt.variant} />
+                <span className="theme-option-label">{opt.label}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        <p className="settings-description" style={{ marginBottom: 10 }}>
+          Or choose a mode separately and let the theme follow your system setting:
+        </p>
+        <div className="mode-options">
+          {(['light', 'dark', 'system'] as Mode[]).map((m) => (
+            <button
+              key={m}
+              className={`mode-btn ${mode === m ? 'mode-btn--active' : ''}`}
+              onClick={() => setMode(m)}
+            >
+              {m === 'light' ? 'Light' : m === 'dark' ? 'Dark' : 'System'}
+            </button>
+          ))}
+        </div>
+      </section>
 
       {/* Rest Day */}
       <section className="settings-section">
