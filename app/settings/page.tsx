@@ -12,10 +12,12 @@ const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frid
 type ThemeOption = { id: Theme; label: string; variant: 'light' | 'dark' }
 
 const THEME_OPTIONS: ThemeOption[] = [
-  { id: 'stone',    label: 'Stone — Light', variant: 'light' },
-  { id: 'stone',    label: 'Stone — Dark',  variant: 'dark'  },
+  { id: 'stone',    label: 'Stone — Light',    variant: 'light' },
+  { id: 'stone',    label: 'Stone — Dark',     variant: 'dark'  },
   { id: 'terminal', label: 'Terminal — Light', variant: 'light' },
   { id: 'terminal', label: 'Terminal — Dark',  variant: 'dark'  },
+  { id: 'neon',     label: 'Neon — Light',     variant: 'light' },
+  { id: 'neon',     label: 'Neon — Dark',      variant: 'dark'  },
 ]
 
 function ThemePreview({ themeId, variant }: { themeId: Theme; variant: 'light' | 'dark' }) {
@@ -89,6 +91,7 @@ export default function SettingsPage() {
         <p className="settings-description">
           Choose a theme and color mode. Stone uses a layered grey-slab design with serif type.
           Terminal uses monospace fonts, flat borders, and a phosphor-screen palette.
+          Neon uses rounded shapes with a lavender-to-magenta palette — or full synthwave glows in dark mode.
         </p>
 
         <div className="theme-options">

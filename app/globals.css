@@ -45,6 +45,55 @@
                   inset -3px 0 6px -6px rgba(0,0,0,0.25);
 }
 
+/* ─── Neon Light ────────────────────────────────────────────────────────── */
+[data-theme="neon"]:not([data-mode="dark"]),
+[data-theme="neon"][data-mode="light"] {
+  --bg:           #FAF5FF;
+  --bg-raised:    #F2EAFF;
+  --bg-inset:     #E6D8FF;
+  --bg-well:      #FEF9FF;
+  --border:       #C47EE8;
+  --border-dark:  #A050C8;
+  --text:         #1E0A3C;
+  --text-muted:   #6B3A8A;
+  --text-faint:   #B090CC;
+  --accent:       #CC00CC;
+  --accent-hover: #AA0099;
+  --accent-light: #F2DEFF;
+  --accent-2:     #6600DD;
+  --shadow-slab:  0 2px 0 0 var(--border-dark), 0 4px 20px 0 rgba(160,0,200,0.12);
+  --shadow-inset: inset 0 8px 6px -8px rgba(130,0,180,0.18),
+                  inset 3px 0 6px -6px rgba(130,0,180,0.08),
+                  inset -3px 0 6px -6px rgba(130,0,180,0.08);
+  --radius:       12px;
+  --radius-lg:    18px;
+  --font-ui:      'Inter', system-ui, -apple-system, sans-serif;
+  --font-text:    Georgia, 'Times New Roman', serif;
+}
+
+/* ─── Neon Dark ─────────────────────────────────────────────────────────── */
+[data-theme="neon"][data-mode="dark"] {
+  --bg:           #080010;
+  --bg-raised:    #110020;
+  --bg-inset:     #0C0018;
+  --bg-well:      #060008;
+  --border:       #EE00EE;
+  --border-dark:  #CC00FF;
+  --text:         #F0E0FF;
+  --text-muted:   #CC88FF;
+  --text-faint:   #664488;
+  --accent:       #FF00FF;
+  --accent-hover: #FF44FF;
+  --accent-light: #380040;
+  --accent-2:     #00FFFF;
+  --shadow-slab:  0 0 0 1px var(--border), 0 0 24px rgba(238,0,238,0.30), 0 4px 32px rgba(0,0,0,0.80);
+  --shadow-inset: inset 0 0 16px rgba(238,0,238,0.08), inset 0 8px 6px -8px rgba(0,0,0,0.70);
+  --radius:       12px;
+  --radius-lg:    18px;
+  --font-ui:      'Inter', system-ui, -apple-system, sans-serif;
+  --font-text:    Georgia, 'Times New Roman', serif;
+}
+
 /* ─── Terminal Light ────────────────────────────────────────────────────── */
 [data-theme="terminal"]:not([data-mode="dark"]),
 [data-theme="terminal"][data-mode="light"] {
@@ -1008,6 +1057,12 @@ body {
 .theme-preview--terminal-dark {
   background: #0C0C08;
 }
+.theme-preview--neon-light {
+  background: #FAF5FF;
+}
+.theme-preview--neon-dark {
+  background: #080010;
+}
 
 .theme-preview-bar {
   height: 20px;
@@ -1020,6 +1075,8 @@ body {
 .theme-preview-bar--stone-dark  { background: #252930; border-bottom: 1px solid #2E353E; }
 .theme-preview-bar--terminal-light { background: #F0F0EC; border-bottom: 2px solid #1C1C18; }
 .theme-preview-bar--terminal-dark  { background: #141410; border-bottom: 2px solid #5A4820; }
+.theme-preview-bar--neon-light { background: #F2EAFF; border-bottom: 1px solid #C47EE8; }
+.theme-preview-bar--neon-dark  { background: #110020; border-bottom: 1px solid #EE00EE; box-shadow: 0 0 6px rgba(238,0,238,0.40); }
 
 .theme-preview-dot {
   width: 5px;
@@ -1030,6 +1087,8 @@ body {
 .theme-preview-dot--stone-dark  { background: #5B9BBF; }
 .theme-preview-dot--terminal-light { background: #1C6B1C; border-radius: 0; }
 .theme-preview-dot--terminal-dark  { background: #F0C030; border-radius: 0; }
+.theme-preview-dot--neon-light { background: #CC00CC; }
+.theme-preview-dot--neon-dark  { background: #FF00FF; box-shadow: 0 0 4px #FF00FF; }
 
 .theme-preview-lines {
   padding: 8px;
@@ -1050,6 +1109,10 @@ body {
 .theme-preview-line--terminal-light.short { background: #1C6B1C; width: 55%; border-radius: 0; }
 .theme-preview-line--terminal-dark  { background: #3A3020; border-radius: 0; }
 .theme-preview-line--terminal-dark.short { background: #F0C030; width: 55%; border-radius: 0; }
+.theme-preview-line--neon-light { background: #E6D8FF; border-radius: 6px; }
+.theme-preview-line--neon-light.short { background: #CC00CC; width: 55%; border-radius: 6px; }
+.theme-preview-line--neon-dark  { background: #1A002E; border-radius: 6px; }
+.theme-preview-line--neon-dark.short { background: #FF00FF; width: 55%; border-radius: 6px; box-shadow: 0 0 4px #FF00FF; }
 
 .theme-option-label {
   display: block;
@@ -1082,6 +1145,79 @@ body {
   background: var(--accent);
   color: var(--bg);
   border-color: var(--accent);
+}
+
+/* ─── Neon Theme Structural Overrides ──────────────────────────────────── */
+
+/* Neon dark — glow on key surfaces */
+[data-theme="neon"][data-mode="dark"] .question-block {
+  box-shadow: var(--shadow-slab);
+}
+[data-theme="neon"][data-mode="dark"] .question-block:focus-within {
+  box-shadow: 0 0 0 1px var(--accent), 0 0 32px rgba(255,0,255,0.35), 0 4px 32px rgba(0,0,0,0.80);
+}
+[data-theme="neon"][data-mode="dark"] .review-card {
+  box-shadow: var(--shadow-slab);
+}
+[data-theme="neon"][data-mode="dark"] .review-card:hover {
+  box-shadow: 0 0 0 1px var(--accent), 0 0 28px rgba(255,0,255,0.35), 0 4px 24px rgba(0,0,0,0.80);
+  transform: translateY(-1px);
+}
+[data-theme="neon"][data-mode="dark"] .archive-card {
+  box-shadow: var(--shadow-slab);
+}
+[data-theme="neon"][data-mode="dark"] .complete-btn {
+  box-shadow: 0 0 12px rgba(255,0,255,0.50), 0 2px 0 0 var(--accent-hover);
+}
+[data-theme="neon"][data-mode="dark"] .complete-btn:hover {
+  box-shadow: 0 0 20px rgba(255,0,255,0.70), 0 0 0 0;
+}
+[data-theme="neon"][data-mode="dark"] .rating-btn--active {
+  box-shadow: 0 0 8px rgba(255,0,255,0.60);
+}
+[data-theme="neon"][data-mode="dark"] .nav-bar {
+  box-shadow: 0 1px 0 0 var(--border), 0 2px 20px rgba(238,0,238,0.18);
+}
+/* Magenta-to-cyan gradient progress bar */
+[data-theme="neon"][data-mode="dark"] .progress-fill {
+  background: linear-gradient(90deg, #FF00FF, #00FFFF);
+  box-shadow: 0 0 8px rgba(255,0,255,0.60);
+}
+/* Writer header glow border */
+[data-theme="neon"][data-mode="dark"] .writer-header {
+  box-shadow: 0 1px 0 0 var(--border), 0 2px 16px rgba(238,0,238,0.15);
+}
+/* Cyan tint on active filter tab */
+[data-theme="neon"][data-mode="dark"] .filter-tab--active {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: #080010;
+  box-shadow: 0 0 10px rgba(0,255,255,0.50);
+}
+/* Cyan glow on completed chips hover */
+[data-theme="neon"][data-mode="dark"] .completed-chip:hover {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+  box-shadow: 0 0 8px rgba(0,255,255,0.30);
+}
+/* Accent-read link in cyan */
+[data-theme="neon"][data-mode="dark"] .archive-read-link {
+  color: var(--accent-2);
+}
+[data-theme="neon"][data-mode="dark"] .archive-read-link:hover {
+  text-shadow: 0 0 8px rgba(0,255,255,0.60);
+}
+[data-theme="neon"][data-mode="dark"] .save-msg {
+  color: var(--accent-2);
+  text-shadow: 0 0 8px rgba(0,255,255,0.40);
+}
+
+/* Neon light — colored shadow on complete button */
+[data-theme="neon"]:not([data-mode="dark"]) .complete-btn {
+  box-shadow: 0 2px 0 0 var(--accent-hover), 0 4px 16px rgba(180,0,180,0.20);
+}
+[data-theme="neon"]:not([data-mode="dark"]) .progress-fill {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
 }
 
 /* ─── Terminal Theme Structural Overrides ───────────────────────────────── */
