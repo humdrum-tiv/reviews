@@ -4,15 +4,20 @@ const ALGORITHM = 'aes-256-gcm'
 const IV_BYTES = 12  // 96-bit IV recommended for GCM
 const TAG_BYTES = 16
 
+let cachedKey: Buffer | null = null
+
 function getKey(): Buffer {
-  const hex = process.env.ENCRYPTION_KEY
-  if (!hex || hex.length !== 64) {
-    throw new Error(
-      'ENCRYPTION_KEY must be a 64-character hex string (32 bytes). ' +
-      'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"'
-    )
+  if (!cachedKey) {
+    const hex = process.env.ENCRYPTION_KEY
+    if (!hex || hex.length !== 64) {
+      throw new Error(
+        'ENCRYPTION_KEY must be a 64-character hex string (32 bytes). ' +
+        'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"'
+      )
+    }
+    cachedKey = Buffer.from(hex, 'hex')
   }
-  return Buffer.from(hex, 'hex')
+  return cachedKey
 }
 
 /**
